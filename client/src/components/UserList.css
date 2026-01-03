@@ -137,3 +137,45 @@
         background-position: 200% 0;
     }
 }
+
+/* Scroll position indicator for 10M+ mode */
+.user-list-wrapper {
+    position: relative;
+}
+
+.scroll-position-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 8px 8px 0 0;
+    border: 1px solid rgba(100, 255, 218, 0.2);
+    border-bottom: none;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+}
+
+.position-current {
+    color: #64ffda;
+    font-weight: 600;
+}
+
+.position-separator {
+    color: #8892b0;
+}
+
+.position-total {
+    color: #8892b0;
+}
+
+.scaling-badge {
+    margin-left: auto;
+    background: linear-gradient(135deg, #64ffda 0%, #4fd1c7 100%);
+    color: #0a192f;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: help;
+}

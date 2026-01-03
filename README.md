@@ -1,8 +1,6 @@
 # Large User List Application
 
-A web application that efficiently displays **630,000+ sorted usernames** without causing the browser to freeze. Features infinite scroll and alphabetical navigation.
-
-![User Directory Preview](https://via.placeholder.com/800x400?text=User+Directory+App)
+A web application that efficiently displays **10 million+ sorted usernames** without causing the browser to freeze. Features infinite scroll, alphabetical navigation, and O(1) random access.
 
 ## 🚀 Quick Start
 
@@ -20,37 +18,57 @@ npm run dev
 
 Open **http://localhost:5173** in your browser.
 
+## 📁 Using Your Own Data File
+
+### Step 1: Prepare your file
+Place your sorted usernames file in the `storage/` folder:
+```
+storage/usernames.txt
+```
+
+**Requirements:**
+- One name per line
+- Sorted alphabetically
+- UTF-8 encoding
+
+### Step 2: Start the server
+The indexes will auto-regenerate on first request:
+```bash
+cd server && npm run dev
+```
+
+That's it! The system automatically:
+- ✅ Detects file changes (size/modification time)
+- ✅ Rebuilds letter index for A-Z navigation
+- ✅ Rebuilds byte offset index for fast random access
+
 ## 📋 Features
 
 | Feature | Description |
 |---------|-------------|
-| **Virtual Scrolling** | Only renders visible items (~20-30 at a time) |
-| **Infinite Loading** | Fetches data in batches as you scroll |
+| **Virtual Scrolling** | Only renders visible items (~30 at a time) |
+| **10M+ Scalability** | Scroll position remapping for unlimited data |
+| **O(1) Random Access** | Byte offset indexing for instant seeking |
+| **Auto-Indexing** | Indexes regenerate when data file changes |
 | **A-Z Navigation** | Click any letter to jump instantly |
-| **Rate Limiting** | Protection against API abuse (1000 req/15min) |
-| **Structured Logging** | Winston logger with file rotation |
+| **Rate Limiting** | Protection against API abuse |
 
-## 🏗️ Architecture
+## 🚀 10 Million+ Scalability
 
+### The Challenge
+Browsers have a max scroll height (~33M pixels). With 40px rows:
+- 10M users × 40px = 400M pixels ❌ (exceeds limit)
+
+### The Solution
+**Scroll Position Remapping**: Maps 250K virtual items to 10M+ actual items.
+
+```javascript
+// Virtual index → Actual index
+const ratio = virtualIndex / (virtualCount - 1);
+const actualIndex = Math.floor(ratio * (totalCount - 1));
 ```
-sanadtech/
-├── server/                  # Node.js + Express backend
-│   ├── src/
-│   │   ├── index.js         # Express server (port 3001)
-│   │   ├── routes/          # API endpoints
-│   │   └── utils/
-│   │       ├── fileStreamer.js  # File streaming logic
-│   │       └── logger.js    # Winston logger
-│   ├── tests/               # Jest API tests
-│   └── logs/                # Application logs
-├── client/                  # React + Vite frontend
-│   └── src/
-│       ├── components/      # UserList, AlphabetNav
-│       ├── hooks/           # useInfiniteUsers (Map-based)
-│       └── services/        # API communication
-└── storage/
-    └── usernames.txt        # 630K sorted names
-```
+
+When dataset exceeds 250K items, "🚀 10M+ Mode" activates automatically.
 
 ## 📡 API Endpoints
 
@@ -60,69 +78,35 @@ sanadtech/
 | `GET /api/users/count` | Total user count |
 | `GET /api/users/jump/:letter` | Jump to letter position |
 | `GET /api/users/letters` | Letter statistics |
-| `GET /health` | Health check with uptime and memory |
+| `GET /health` | Health check |
 
 ## 🧪 Running Tests
 
 ```bash
 cd server
-npm test                    # Run all tests
-npm run test:coverage       # Run with coverage report
+npm test           # 11 tests passing
+npm run test:coverage
 ```
 
-### Test Coverage
+## ⚡ Performance
 
-- ✅ User pagination endpoint
-- ✅ Offset/limit validation
-- ✅ Max limit enforcement (1000)
-- ✅ User count endpoint
-- ✅ Letter statistics endpoint
-- ✅ Letter jump navigation
-- ✅ Input validation (invalid letters)
+### Backend Optimizations
+- **Byte offset indexing** - O(1) access to any line (checkpoints every 10K lines)
+- **File streaming** - 64KB buffers, early termination
+- **Auto-caching** - Indexes cached with file signature validation
 
-## ⚡ Performance Optimizations
+### Frontend Optimizations
+- **Scroll remapping** - Supports 10M+ items within browser limits
+- **Map-based storage** - Efficient sparse data handling
+- **Parallel loading** - 3 pages fetched simultaneously
+- **Memoized components** - Prevents unnecessary re-renders
 
-### Backend
-- **64KB read buffers** for fast file streaming
-- **Early termination** - stops reading once limit reached
-- **Letter index caching** - O(1) letter navigation
-- **Pre-warmed caches** on server startup
+## 🔒 Security
 
-### Frontend
-- **Map-based storage** instead of sparse array (memory efficient)
-- **Parallel page loading** (3 pages at a time)
-- **40px row height** - stays within browser scroll limits
-- **Memoized components** - prevents unnecessary re-renders
-
-## � Security Features
-
-- **Rate Limiting**: 1000 requests per 15 minutes per IP
-- **CORS Restrictions**: Only allows configured origins
-- **Input Validation**: Validates all user input
-- **Error Handling**: Proper error responses without stack traces
-
-## �📊 Logging & Observability
-
-The application uses Winston for structured logging:
-
-```
-logs/
-├── combined.log    # All logs (info, warn, error)
-└── error.log       # Errors only
-```
-
-Each request is logged with:
-- HTTP method and path
-- Query parameters
-- Response status
-- Duration (ms)
-- Client IP
-
-## 📝 Technical Notes
-
-- **Max scroll height**: Browser limit is ~33M pixels. With 40px rows, we support up to 800K+ items.
-- **Data file**: Plain text, one name per line, sorted alphabetically.
-- **Letter index**: Auto-generated on first request, cached in `storage/letter-index.json`.
+- Rate limiting (1000 req/15min per IP)
+- CORS restrictions
+- Input validation
+- Structured logging (Winston)
 
 ## 📄 License
 
