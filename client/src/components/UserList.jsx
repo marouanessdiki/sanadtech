@@ -164,9 +164,6 @@ function UserList({ users, totalCount, onItemsRendered, isItemLoaded, listRef })
                     <span className="position-current">{currentPosition.toLocaleString()}</span>
                     <span className="position-separator">/</span>
                     <span className="position-total">{totalCount.toLocaleString()}</span>
-                    <span className="scaling-badge" title="Using scroll remapping for 10M+ support">
-                        🚀 10M+ Mode
-                    </span>
                 </div>
             )}
 
